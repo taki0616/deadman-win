@@ -54,13 +54,20 @@ RTT_SCALE = 10
 SSH_CONNECT_TIMEOUT = 3
 
 OSNAME = getoutput("uname -s")
+print(OSNAME)
 if 'uname' in OSNAME:
     OSNAME = os.name
     LANG_CMD= getoutput("chcp")
-    if LANG_CMD == "Active code page: 437":
+    print (LANG_CMD.split(": ")[1])
+    if LANG_CMD.split(":")[1] == "932" or LANG_CMD.split(":")[1] == "51931" or LANG_CMD.split(":")[1] == "65001":
+        # https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers
+        # 932:Shift_JIS
+        # 51931:EUC-JP
+        # 65001:UTF-8
         LANGC = "JP"
-    else: LANGC = "EN"
-    #os.system("chcp 437")
+    else:
+        LANGC = "EN"
+        # 437:OEM United States
 
 PING_SUCCESS      = 0
 PING_FAILED       = -1
