@@ -53,12 +53,9 @@ RTT_SCALE = 10
 
 SSH_CONNECT_TIMEOUT = 3
 
-OSNAME = getoutput("uname -s")
-print(OSNAME)
-if 'uname' in OSNAME:
+if os.name == "nt":
     OSNAME = os.name
     LANG_CMD= getoutput("chcp")
-    print (LANG_CMD.split(": ")[1])
     if LANG_CMD.split(":")[1] == "932" or LANG_CMD.split(":")[1] == "51931" or LANG_CMD.split(":")[1] == "65001":
         # https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers
         # 932:Shift_JIS
@@ -68,6 +65,8 @@ if 'uname' in OSNAME:
     else:
         LANGC = "EN"
         # 437:OEM United States
+else:
+    OSNAME = getoutput("uname -s")
 
 PING_SUCCESS      = 0
 PING_FAILED       = -1
@@ -293,8 +292,17 @@ class Ping:
             result = out.decode("utf-8")
         if LANGC == "JP":
             rttm = re.search('時間 =(\d+\.\d+)', result)
+            rttm = re.search('時間 <(\d+\.\d+)', result)
             if not rttm:
                 rttm = re.search('時間 =(\d+)', result)
+                rttm = re.search('時間 <(\d+)', result)
+
+        if OSNAME == 'nt':
+            rttm = re.search(r'time=(\d+\.\d+)', result)
+            rttm = re.search(r'time<(\d+\.\d+)', result)
+            if not rttm:
+                rttm = re.search(r'time=(\d+)', result)
+                rttm = re.search(r'time<(\d+)', result)
 
         rttm = re.search(r'time=(\d+\.\d+)', result)
         if not rttm:
@@ -788,7 +796,6 @@ def pingcmd(osname, ipv):
     Timeout is controlled by asyncio.wait_for.
     As a result, there is no difference :0 I need cleanup.
     """
-    print(osname)
     if (osname == "Linux" or
         osname == "Darwin" or
         osname == "FreeBSD"):
